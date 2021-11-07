@@ -31,7 +31,7 @@ setup(
     author='Hugh Sorby',
     author_email='h.sorby@auckland.ac.nz',
     description='A Flask backend for the model-parameter-sensitivity Vue frontend.',
-    install_requires=['Flask', 'Flask-Cors', 'gunicorn', 'pyjwt', 'cryptography', 'libcellml'],
+    install_requires=['Flask', 'Flask-Cors', 'gunicorn', 'pyjwt', 'cryptography', 'libcellml', 'FileLock', 'psutil'],
     entry_points={
         'console_scripts': ['mps-serve=mps_server.run_server:main'],
     }

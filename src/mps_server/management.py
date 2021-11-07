@@ -2,12 +2,9 @@ import json
 import os
 
 from cellsolvertools.utilities import is_cellml_file
+
+from mps_server.common import normalise_for_use_as_path
 from mps_server.libcellml_tools import get_parameters_from_model
-
-
-def _normalise_to_path(data_in):
-    """Normalise the 'data_in' so it can be used as part of a path."""
-    return data_in.replace('|', '_').replace('.', '_dot_')
 
 
 def _create_output_dir(required_dir):
@@ -17,19 +14,19 @@ def _create_output_dir(required_dir):
 
 
 def _model_files_dir(base_dir, user_id):
-    user_path = _normalise_to_path(user_id)
+    user_path = normalise_for_use_as_path(user_id)
     return os.path.join(base_dir, user_path, 'model_files')
 
 
 def _output_parameter_files_dir(base_dir, user_id, associated_model):
-    user_path = _normalise_to_path(user_id)
-    model_path = _normalise_to_path(associated_model)
+    user_path = normalise_for_use_as_path(user_id)
+    model_path = normalise_for_use_as_path(associated_model)
     return os.path.join(base_dir, user_path, 'output_parameter_files', model_path)
 
 
 def _uncertainty_definitions_files_dir(base_dir, user_id, associated_model):
-    user_path = _normalise_to_path(user_id)
-    model_path = _normalise_to_path(associated_model)
+    user_path = normalise_for_use_as_path(user_id)
+    model_path = normalise_for_use_as_path(associated_model)
     return os.path.join(base_dir, user_path, 'uncertainty_definition_files', model_path)
 
 
