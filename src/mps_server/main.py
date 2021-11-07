@@ -7,7 +7,7 @@ from mps_server.auth0 import requires_auth, AuthError
 from mps_server.config import Config
 from mps_server.management import store_cellml_file, list_model_files, model_parameter_information, store_parameter_uncertainties_file, \
     parameter_uncertainty_distribution_information, list_uncertainty_definitions_files, list_output_parameter_files, output_parameters_information, store_output_parameters_file
-from mps_server.simulations import queue_simulation, start_simulation_manager_process
+from mps_server.simulations import queue_simulation
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('MPS_SECRET_KEY', 'secret-key-value')
