@@ -1,10 +1,9 @@
 import json
 import os
 
-from cellsolvertools.utilities import is_cellml_file
+from cellsolvertools.utilities import is_cellml_file, get_parameters_from_model
 
 from mps_server.common import normalise_for_use_as_path
-from mps_server.libcellml_tools import get_parameters_from_model
 
 
 def _create_output_dir(required_dir):
@@ -22,6 +21,11 @@ def _output_parameter_files_dir(base_dir, user_id, associated_model):
     user_path = normalise_for_use_as_path(user_id)
     model_path = normalise_for_use_as_path(associated_model)
     return os.path.join(base_dir, user_path, 'output_parameter_files', model_path)
+
+
+def _simulation_files_dir(base_dir, user_id):
+    user_path = normalise_for_use_as_path(user_id)
+    return os.path.join(base_dir, user_path, 'simulation_files')
 
 
 def _uncertainty_definitions_files_dir(base_dir, user_id, associated_model):
@@ -46,6 +50,29 @@ def list_model_files(base_dir, user_id):
     files_dir = _model_files_dir(base_dir, user_id)
     _create_output_dir(files_dir)
     return os.listdir(files_dir)
+
+
+def list_simulation_references(base_dir, user_id):
+    files_dir = _simulation_files_dir(base_dir, user_id)
+    _create_output_dir(files_dir)
+    return os.listdir(files_dir)
+
+
+def get_model_file(base_dir, user_id, model):
+    return os.path.join(_model_files_dir(base_dir, user_id), model)
+
+
+def store_simulation_info(simulation_info):
+    output_dir = _simulation_files_dir(simulation_info['base_dir'], simulation_info['user_id'])
+    target_location = os.path.join(output_dir, simulation_info['reference'])
+    try:
+        with open(target_location, 'w') as f:
+            f.write("")
+
+    except OSError:
+        return 1
+
+    return 0
 
 
 def store_output_parameters_file(file_info, data):

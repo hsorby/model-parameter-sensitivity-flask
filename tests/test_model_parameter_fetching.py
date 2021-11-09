@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from mps_server.libcellml_tools import get_parameters_from_model
+from cellsolvertools.utilities import get_parameters_from_model
 
 
 class PreparationTestCase(unittest.TestCase):

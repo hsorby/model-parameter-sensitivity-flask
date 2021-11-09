@@ -6,8 +6,9 @@ from flask_cors import CORS
 from mps_server.auth0 import requires_auth, AuthError
 from mps_server.config import Config
 from mps_server.management import store_cellml_file, list_model_files, model_parameter_information, store_parameter_uncertainties_file, \
-    parameter_uncertainty_distribution_information, list_uncertainty_definitions_files, list_output_parameter_files, output_parameters_information, store_output_parameters_file
-from mps_server.simulations import queue_simulation
+    parameter_uncertainty_distribution_information, list_uncertainty_definitions_files, list_output_parameter_files, output_parameters_information, store_output_parameters_file, \
+    store_simulation_info, list_simulation_references
+from mps_server.simulations import queue_simulation, get_simulation_info, get_simulation_result
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('MPS_SECRET_KEY', 'secret-key-value')
@@ -67,11 +68,53 @@ def output_parameters_info():
     return jsonify({'output_parameters_information': output_information})
 
 
+@app.route("/api/v1/user/simulation-result")
+@requires_auth
+def user_simulation_result():
+    reference = request.args.get('reference')
+    r = get_simulation_result(reference)
+    if r is not None:
+        return r
+
+    response = jsonify({'message': 'No information available for simulation.'})
+    response.status_code = 400
+    return response
+
+
+@app.route("/api/v1/user/simulation-info")
+@requires_auth
+def user_simulation_info():
+    reference = request.args.get('reference')
+    i = get_simulation_info(reference)
+    if i:
+        return jsonify({'simulation_info': i})
+
+    response = jsonify({'message': 'No information available for simulation.'})
+    response.status_code = 400
+    return response
+
+
 @app.route("/api/v1/user/list-models")
 @requires_auth
 def user_models():
     model_files = list_model_files(Config.CLIENT_WORKING_DIR, session['user_id'])
     return jsonify({'model_files': model_files})
+
+
+@app.route("/api/v1/user/list-simulations")
+@requires_auth
+def user_simulations():
+    references = list_simulation_references(Config.CLIENT_WORKING_DIR, session['user_id'])
+
+    info = []
+    for reference in references:
+        i = get_simulation_info(reference)
+        if i:
+            info.append(i)
+        else:
+            print('remove dead reference.')
+
+    return jsonify({'simulation_info': info})
 
 
 @app.route("/api/v1/user/list-parameter-uncertainties")
@@ -160,7 +203,13 @@ def submit_simulation():
     simulation_data = request.json
     simulation_data['user_id'] = session['user_id']
     result = queue_simulation(simulation_data)
+
     if result is not None:
+        store_simulation_info({
+            'base_dir': Config.CLIENT_WORKING_DIR,
+            'user_id': session['user_id'],
+            **result,
+        })
         return jsonify({'message': 'Job submitted successfully', **result})
 
     response = jsonify({'message': 'An error occurred while trying to submit job'})
